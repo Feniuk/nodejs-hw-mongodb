@@ -1,4 +1,5 @@
 import { getContacts, getContactsById } from '../services/contacts';
+import mongoose from 'mongoose';
 
 export const getContactsController = async (req, res) => {
   try {
