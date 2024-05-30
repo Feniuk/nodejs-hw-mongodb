@@ -12,6 +12,7 @@ const contactSchema = new Schema(
     },
     email: {
       type: String,
+      optional: true,
     },
     isFavourite: {
       type: Boolean,
@@ -29,5 +30,5 @@ const contactSchema = new Schema(
   },
 );
 
-const Contact = model('contacts', contactSchema);
-export default Contact;
+export const Contact = model('contacts', contactSchema);
+// export default Contact;
