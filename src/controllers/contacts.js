@@ -1,20 +1,16 @@
-import { getContacts, getContactsById } from '../services/contacts';
+import { getContacts, getContactsById } from '../services/contacts.js';
 import mongoose from 'mongoose';
 
 export const getContactsController = async (req, res) => {
-  try {
-    const contacts = await getContacts();
-    res.status(200).json({
-      status: res.statusCode,
-      message: 'Successfully found contacts!',
-      data: contacts,
-    });
-  } catch (error) {
-    next(error);
-  }
+  const contacts = await getContacts();
+  res.status(200).json({
+    status: res.statusCode,
+    message: 'Successfully found contacts!',
+    data: contacts,
+  });
 };
 
-export const getContactsByIdController = async (req, res, next) => {
+export const getContactsByIdController = async (req, res) => {
   const { contactId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(contactId)) {
     res.status(404).json({

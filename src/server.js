@@ -5,6 +5,9 @@ import pinoHttp from 'pino-http';
 import { env } from './utils/env.js';
 import { getContacts, getContactsById } from './services/contacts.js';
 import mongoose from 'mongoose';
+import router from './routers/contacts.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { notFoundHandler } from './middleware/notFoundHandler.js';
 
 const PORT = Number(env('PORT', '3000'));
 
@@ -53,11 +56,11 @@ export const setupServer = () => {
   //   });
   // });
 
-  app.use('*', (req, res) => {
-    res.status(404).json({
-      message: 'Not found',
-    });
-  });
+  app.use(router);
+
+  app.use('*', notFoundHandler);
+
+  app.use(errorHandler);
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
