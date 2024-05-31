@@ -3,6 +3,7 @@ import {
   getContactsById,
   createContact,
   deleteContactById,
+  upsertContact,
 } from '../services/contacts.js';
 import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
@@ -58,9 +59,17 @@ export const deleteContactByIdController = async (req, res, next) => {
   }
   await deleteContactById(id);
 
-  // if (!contact) {
-  //   return next(createHttpError(404, 'Contact cannot be deleted'));
-  // }
-
   res.status(204).send();
+};
+
+export const patchSContactController = async (req, res) => {
+  const { body } = req;
+  const { contactId } = req.params;
+  const { contact } = await upsertContact(contactId, body);
+
+  res.status(200).json({
+    status: 200,
+    message: `Successfully patched student!`,
+    data: contact,
+  });
 };
