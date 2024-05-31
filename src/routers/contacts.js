@@ -6,16 +6,9 @@ import {
   deleteContactByIdController,
   patchSContactController,
 } from '../controllers/contacts.js';
+import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 
 const router = Router();
-
-const ctrlWrapper = (controller) => async (req, res, next) => {
-  try {
-    await controller(req, res, next);
-  } catch (error) {
-    next(error);
-  }
-};
 
 router.get('/contacts', ctrlWrapper(getContactsController));
 router.get('/contacts/:contactId', getContactsByIdController);
