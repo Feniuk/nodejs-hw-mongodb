@@ -1,9 +1,34 @@
 import { Contact } from '../db/contact.js';
 import createHttpError from 'http-errors';
+import { createPaginationInformation } from '../utils/createPaginationInformation.js';
+import { SORT_ORDER } from '../constants/index.js';
 
-export const getContacts = async () => {
-  const contacts = await Contact.find({});
-  return contacts;
+export const getContacts = async ({
+  page = 1,
+  perPage = 10,
+  sortOrder = SORT_ORDER.ASC,
+  sortBy = '_id',
+}) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
+  const contactQuery = Contact.find();
+
+  const [contactsCount, contacts] = await Promise.all([
+    Contact.find().merge(contactQuery).countDocuments(),
+    contactQuery
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder })
+      .exec(),
+  ]);
+
+  const paginationInfo = createPaginationInformation(
+    page,
+    perPage,
+    contactsCount,
+  );
+
+  return { contacts, ...paginationInfo };
 };
 
 export const getContactsById = async (contactId) => {
