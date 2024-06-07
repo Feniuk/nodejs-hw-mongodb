@@ -7,9 +7,19 @@ import {
 } from '../services/contacts.js';
 import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
+import { parsePaginationParams } from '../utils/parsePaginationParams.js';
+import { extractSortParams } from '../utils/extractSortParams.js';
 
 export const getContactsController = async (req, res) => {
-  const contacts = await getContacts();
+  const { page, perPage } = parsePaginationParams(req.query);
+  const { sortBy, sortOrder } = extractSortParams(req.query);
+
+  const contacts = await getContacts({
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+  });
   res.status(200).json({
     status: res.statusCode,
     message: 'Successfully found contacts!',
