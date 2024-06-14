@@ -31,8 +31,8 @@ export const getContacts = async ({
   return { contacts, ...paginationInfo };
 };
 
-export const getContactsById = async (contactId) => {
-  const contact = await Contact.findById(contactId);
+export const getContactsById = async (payload) => {
+  const contact = await Contact.findById(payload);
   return contact;
 };
 
@@ -41,12 +41,12 @@ export const createContact = async (payload) => {
   return contact;
 };
 
-export const deleteContactById = async (contactId) => {
-  await Contact.findByIdAndDelete(contactId);
+export const deleteContactById = async (authContactId) => {
+  await Contact.findByIdAndDelete(authContactId);
 };
 
-export const upsertContact = async (contactId, payload, options = {}) => {
-  const rawResult = await Contact.findByIdAndUpdate(contactId, payload, {
+export const upsertContact = async (authContactId, payload, options = {}) => {
+  const rawResult = await Contact.findByIdAndUpdate(authContactId, payload, {
     new: true,
     includeResultMetadata: true,
     ...options,

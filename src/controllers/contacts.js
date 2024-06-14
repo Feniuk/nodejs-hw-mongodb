@@ -27,10 +27,25 @@ export const getContactsController = async (req, res) => {
   });
 };
 
-export const getContactsByIdController = async (req, res, next) => {
+const constructAuthContactObject = (req) => {
+  let authContactId = {};
   const { contactId } = req.params;
+  const userId = req.user._id;
+  if (contactId) {
+    authContactId = { _id: contactId };
+  }
+  if (userId) {
+    authContactId = { ...authContactId, userId: userId };
+  }
 
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {
+  return authContactId;
+};
+
+export const getContactsByIdController = async (req, res, next) => {
+  const authContactId = constructAuthContactObject(req);
+  const contactId = authContactId._id;
+
+  if (contactId && !mongoose.Types.ObjectId.isValid(contactId)) {
     return res.status(404).json({
       status: 404,
       message: 'Problem exists with contact id!',
@@ -41,7 +56,7 @@ export const getContactsByIdController = async (req, res, next) => {
   }
 
   try {
-    const contact = await getContactsById(contactId);
+    const contact = await getContactsById(authContactId);
 
     if (!contact) {
       return res.status(404).json({
@@ -64,21 +79,20 @@ export const getContactsByIdController = async (req, res, next) => {
 };
 
 export const createContactController = async (req, res) => {
-  const { body } = req;
-  const contact = await createContact(body);
+  const contact = await createContact({ userId: req.user._id, ...req.body });
 
   res.status(201).json({
     status: 201,
-    message: `Successfully created student!`,
+    message: `Successfully created сontact!`,
     data: contact,
   });
 };
 
 export const deleteContactByIdController = async (req, res, next) => {
-  const id = req.params.contactId;
+  const authContactId = constructAuthContactObject(req);
 
   try {
-    const contact = await getContactsById(id);
+    const contact = await getContactsById(authContactId);
 
     if (!contact) {
       return res.status(404).json({
@@ -90,7 +104,7 @@ export const deleteContactByIdController = async (req, res, next) => {
       });
     }
 
-    await deleteContactById(id);
+    await deleteContactById(authContactId);
 
     res.status(204).send();
   } catch (error) {
@@ -100,10 +114,10 @@ export const deleteContactByIdController = async (req, res, next) => {
 
 export const patchSContactController = async (req, res, next) => {
   const { body } = req;
-  const { contactId } = req.params;
+  const authContactId = constructAuthContactObject(req);
 
   try {
-    const existingContact = await getContactsById(contactId);
+    const existingContact = await getContactsById(authContactId);
 
     if (!existingContact) {
       return res.status(404).json({
@@ -115,7 +129,7 @@ export const patchSContactController = async (req, res, next) => {
       });
     }
 
-    const { contact } = await upsertContact(contactId, body);
+    const { contact } = await upsertContact(authContactId, body);
 
     res.status(200).json({
       status: 200,
