@@ -28,8 +28,6 @@ export const getContactsController = async (req, res) => {
       data: contacts,
     });
   } catch (error) {
-    console.error('Error in getContactsController:', error);
-    // Використовуємо createHttpError для створення помилки HTTP
     const httpError = createHttpError(500, 'Internal Server Error');
     res.status(httpError.statusCode).json({
       status: httpError.statusCode,
@@ -57,7 +55,6 @@ export const getContactsByIdController = async (req, res, next) => {
   const contactId = authContactId._id;
 
   if (contactId && !mongoose.Types.ObjectId.isValid(contactId)) {
-    // Використовуємо createHttpError для створення помилки HTTP
     const httpError = createHttpError(404, 'Invalid contact ID');
     return next(httpError);
   }
@@ -66,7 +63,6 @@ export const getContactsByIdController = async (req, res, next) => {
     const contact = await getContactsById(authContactId);
 
     if (!contact) {
-      // Використовуємо createHttpError для створення помилки HTTP
       const httpError = createHttpError(404, 'Contact not found');
       return next(httpError);
     }
@@ -77,7 +73,6 @@ export const getContactsByIdController = async (req, res, next) => {
       data: contact,
     });
   } catch (error) {
-    console.error('Error in getContactsByIdController:', error);
     next(error);
   }
 };
@@ -92,8 +87,6 @@ export const createContactController = async (req, res) => {
       data: contact,
     });
   } catch (error) {
-    console.error('Error in createContactController:', error);
-    // Використовуємо createHttpError для створення помилки HTTP
     const httpError = createHttpError(500, 'Internal Server Error');
     res.status(httpError.statusCode).json({
       status: httpError.statusCode,
@@ -109,7 +102,6 @@ export const deleteContactByIdController = async (req, res, next) => {
     const contact = await getContactsById(authContactId);
 
     if (!contact) {
-      // Використовуємо createHttpError для створення помилки HTTP
       const httpError = createHttpError(404, 'Contact not found');
       return next(httpError);
     }
@@ -118,7 +110,6 @@ export const deleteContactByIdController = async (req, res, next) => {
 
     res.status(204).send();
   } catch (error) {
-    console.error('Error in deleteContactByIdController:', error);
     next(error);
   }
 };
@@ -131,7 +122,6 @@ export const patchContactController = async (req, res, next) => {
     const existingContact = await getContactsById(authContactId);
 
     if (!existingContact) {
-      // Використовуємо createHttpError для створення помилки HTTP
       const httpError = createHttpError(404, 'Contact not found');
       return next(httpError);
     }
@@ -144,7 +134,6 @@ export const patchContactController = async (req, res, next) => {
       data: contact,
     });
   } catch (error) {
-    console.error('Error in patchContactController:', error);
     next(error);
   }
 };
