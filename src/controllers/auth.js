@@ -1,4 +1,3 @@
-import { FIFTEEN_MINUTES, THIRTY_DAYS } from '../constants/index.js';
 import {
   createUser,
   loginUser,

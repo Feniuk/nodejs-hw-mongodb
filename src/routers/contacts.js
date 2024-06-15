@@ -4,7 +4,7 @@ import {
   getContactsByIdController,
   createContactController,
   deleteContactByIdController,
-  patchSContactController,
+  patchContactController,
 } from '../controllers/contacts.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middleware/validateBody.js';
@@ -29,7 +29,7 @@ router.delete('/:contactId', ctrlWrapper(deleteContactByIdController));
 router.patch(
   '/:contactId',
   validateBody(updateContactSchema),
-  ctrlWrapper(patchSContactController),
+  ctrlWrapper(patchContactController),
 );
 
 export default router;
