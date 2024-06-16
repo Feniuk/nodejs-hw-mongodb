@@ -13,9 +13,11 @@ import { extractSortParams } from '../utils/extractSortParams.js';
 export const getContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = extractSortParams(req.query);
+  const userId = req.user._id;
 
   try {
     const contacts = await getContacts({
+      userId,
       page,
       perPage,
       sortBy,

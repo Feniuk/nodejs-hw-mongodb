@@ -4,6 +4,7 @@ import { createPaginationInformation } from '../utils/createPaginationInformatio
 import { SORT_ORDER } from '../constants/index.js';
 
 export const getContacts = async ({
+  userId,
   page = 1,
   perPage = 10,
   sortOrder = SORT_ORDER.ASC,
@@ -11,10 +12,10 @@ export const getContacts = async ({
 }) => {
   const limit = perPage;
   const skip = (page - 1) * perPage;
-  const contactQuery = Contact.find();
+  const contactQuery = Contact.find({ userId });
 
   const [contactsCount, contacts] = await Promise.all([
-    Contact.find().merge(contactQuery).countDocuments(),
+    Contact.find({ userId }).merge(contactQuery).countDocuments(),
     contactQuery
       .skip(skip)
       .limit(limit)
