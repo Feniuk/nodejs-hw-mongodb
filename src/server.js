@@ -5,9 +5,10 @@ import pinoHttp from 'pino-http';
 import { env } from './utils/env.js';
 import { getContacts, getContactsById } from './services/contacts.js';
 import mongoose from 'mongoose';
-import router from './routers/contacts.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
+import rootRouter from './routers/index.js';
+import cookieParser from 'cookie-parser';
 
 const PORT = Number(env('PORT', '3000'));
 
@@ -21,9 +22,10 @@ export const setupServer = () => {
 
   app.use(express.json());
   app.use(cors());
+  app.use(cookieParser());
   app.use(pinoHttp({ logger }));
 
-  app.use(router);
+  app.use(rootRouter);
 
   app.use('*', notFoundHandler);
 
