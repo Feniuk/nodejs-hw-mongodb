@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { extractSortParams } from '../utils/extractSortParams.js';
+import { saveToCloudinary } from '../utils/saveToCloudinary.js';
 
 export const getContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -81,7 +82,15 @@ export const getContactsByIdController = async (req, res, next) => {
 
 export const createContactController = async (req, res) => {
   try {
-    const contact = await createContact({ userId: req.user._id, ...req.body });
+    const photo = req.file;
+
+    const photoUrl = await saveToCloudinary(photo);
+
+    const contact = await createContact({
+      userId: req.user._id,
+      photo: photoUrl,
+      ...req.body,
+    });
 
     res.status(201).json({
       status: 201,
@@ -119,6 +128,7 @@ export const deleteContactByIdController = async (req, res, next) => {
 export const patchContactController = async (req, res, next) => {
   const { body } = req;
   const authContactId = constructAuthContactObject(req);
+  const photo = req.file;
 
   try {
     const existingContact = await getContactsById(authContactId);
@@ -128,7 +138,12 @@ export const patchContactController = async (req, res, next) => {
       return next(httpError);
     }
 
-    const { contact } = await upsertContact(authContactId, body);
+    const photoUrl = await saveToCloudinary(photo);
+
+    const { contact } = await upsertContact(authContactId, {
+      ...body,
+      photo: photoUrl,
+    });
 
     res.status(200).json({
       status: 200,

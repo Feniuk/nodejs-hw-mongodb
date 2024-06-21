@@ -15,6 +15,10 @@ export const SMTP = {
   SMTP_FROM: 'SMTP_FROM',
   JWT_SECRET: 'JWT_SECRET',
   APP_DOMAIN: 'APP_DOMAIN',
+  CLOUDINARY_NAME: 'CLOUDINARY_NAME',
+  CLOUDINARY_API_KEY: 'CLOUDINARY_API_KEY',
+  CLOUDINARY_API_SECRET: 'CLOUDINARY_API_SECRET',
 };
 
 export const TEMPLATE_DIR = path.join(process.cwd(), 'src', 'templates');
+export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
