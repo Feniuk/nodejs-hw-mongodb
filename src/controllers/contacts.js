@@ -83,18 +83,26 @@ export const getContactsByIdController = async (req, res, next) => {
 export const createContactController = async (req, res) => {
   try {
     const photo = req.file;
+    let photoUrl = null;
 
-    const photoUrl = await saveToCloudinary(photo);
+    if (photo) {
+      photoUrl = await saveToCloudinary(photo);
+    }
 
-    const contact = await createContact({
+    const contactData = {
       userId: req.user._id,
-      photo: photoUrl,
       ...req.body,
-    });
+    };
+
+    if (photoUrl) {
+      contactData.photo = photoUrl;
+    }
+
+    const contact = await createContact(contactData);
 
     res.status(201).json({
       status: 201,
-      message: `Successfully created contact!`,
+      message: 'Successfully created contact!',
       data: contact,
     });
   } catch (error) {
@@ -138,16 +146,24 @@ export const patchContactController = async (req, res, next) => {
       return next(httpError);
     }
 
-    const photoUrl = await saveToCloudinary(photo);
+    let photoUrl = null;
+    if (photo) {
+      photoUrl = await saveToCloudinary(photo);
+    }
 
-    const { contact } = await upsertContact(authContactId, {
+    const updatedContactData = {
       ...body,
-      photo: photoUrl,
-    });
+    };
+
+    if (photoUrl) {
+      updatedContactData.photo = photoUrl;
+    }
+
+    const { contact } = await upsertContact(authContactId, updatedContactData);
 
     res.status(200).json({
       status: 200,
-      message: `Successfully patched contact!`,
+      message: 'Successfully patched contact!',
       data: contact,
     });
   } catch (error) {
