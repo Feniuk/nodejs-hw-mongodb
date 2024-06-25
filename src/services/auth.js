@@ -3,6 +3,13 @@ import bcrypt from 'bcrypt';
 import createHttpError from 'http-errors';
 import { Session } from '../db/session.js';
 import { createSession } from '../utils/createSession.js';
+import jwt from 'jsonwebtoken';
+import { SMTP, TEMPLATE_DIR } from '../constants/index.js';
+import { sendMail } from '../utils/sendMail.js';
+import { env } from '../utils/env.js';
+import Handlebars from 'handlebars';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 export const createUser = async (payload) => {
   const existingUser = await User.findOne({ email: payload.email });
@@ -71,4 +78,66 @@ export const refreshSession = async (payload) => {
     userId: user._id,
     ...createSession(),
   });
+};
+
+export const sendResetPassword = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw createHttpError(404, 'User not found!');
+  }
+
+  const token = jwt.sign(
+    {
+      sub: user._id,
+      email,
+    },
+    env(SMTP.JWT_SECRET),
+    {
+      expiresIn: '5m',
+    },
+  );
+
+  const templateSource = await fs.readFile(
+    path.join(TEMPLATE_DIR, 'reset-pwd-email.html'),
+  );
+
+  const template = Handlebars.compile(templateSource.toString());
+
+  const html = template({
+    name: user.name,
+    link: `${env(SMTP.SMTP_HOST)}/reset-password/${token}`,
+  });
+
+  try {
+    await sendMail({
+      html,
+      from: env(SMTP.SMTP_FROM),
+      to: email,
+      subject: 'Reset password',
+    });
+  } catch (error) {
+    console.log(error);
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
+};
+
+export const resetPassword = async ({ token, password }) => {
+  let tokenPayload;
+  try {
+    tokenPayload = jwt.verify(token, env(SMTP.JWT_SECRET));
+  } catch (error) {
+    console.log(error);
+    throw createHttpError(401, 'Token is expired or invalid.');
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await User.findOneAndUpdate(
+    { _id: tokenPayload.sub, email: tokenPayload.email },
+    { password: hashedPassword },
+  );
 };

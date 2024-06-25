@@ -13,6 +13,7 @@ import {
   updateContactSchema,
 } from '../validation/contacts.js';
 import { authenticate } from '../middleware/authenticate.js';
+import { upload } from '../middleware/upload.js';
 
 const router = Router();
 
@@ -22,12 +23,14 @@ router.get('/', ctrlWrapper(getContactsController));
 router.get('/:contactId', ctrlWrapper(getContactsByIdController));
 router.post(
   '/',
+  upload.single('photo'),
   validateBody(createContactSchema),
   ctrlWrapper(createContactController),
 );
 router.delete('/:contactId', ctrlWrapper(deleteContactByIdController));
 router.patch(
   '/:contactId',
+  upload.single('photo'),
   validateBody(updateContactSchema),
   ctrlWrapper(patchContactController),
 );

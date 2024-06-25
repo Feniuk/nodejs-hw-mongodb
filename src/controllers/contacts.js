@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import createHttpError from 'http-errors';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { extractSortParams } from '../utils/extractSortParams.js';
+import { saveToCloudinary } from '../utils/saveToCloudinary.js';
 
 export const getContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
@@ -81,11 +82,27 @@ export const getContactsByIdController = async (req, res, next) => {
 
 export const createContactController = async (req, res) => {
   try {
-    const contact = await createContact({ userId: req.user._id, ...req.body });
+    const photo = req.file;
+    let photoUrl = null;
+
+    if (photo) {
+      photoUrl = await saveToCloudinary(photo);
+    }
+
+    const contactData = {
+      userId: req.user._id,
+      ...req.body,
+    };
+
+    if (photoUrl) {
+      contactData.photo = photoUrl;
+    }
+
+    const contact = await createContact(contactData);
 
     res.status(201).json({
       status: 201,
-      message: `Successfully created contact!`,
+      message: 'Successfully created contact!',
       data: contact,
     });
   } catch (error) {
@@ -119,6 +136,7 @@ export const deleteContactByIdController = async (req, res, next) => {
 export const patchContactController = async (req, res, next) => {
   const { body } = req;
   const authContactId = constructAuthContactObject(req);
+  const photo = req.file;
 
   try {
     const existingContact = await getContactsById(authContactId);
@@ -128,11 +146,24 @@ export const patchContactController = async (req, res, next) => {
       return next(httpError);
     }
 
-    const { contact } = await upsertContact(authContactId, body);
+    let photoUrl = null;
+    if (photo) {
+      photoUrl = await saveToCloudinary(photo);
+    }
+
+    const updatedContactData = {
+      ...body,
+    };
+
+    if (photoUrl) {
+      updatedContactData.photo = photoUrl;
+    }
+
+    const { contact } = await upsertContact(authContactId, updatedContactData);
 
     res.status(200).json({
       status: 200,
-      message: `Successfully patched contact!`,
+      message: 'Successfully patched contact!',
       data: contact,
     });
   } catch (error) {
