@@ -9,11 +9,13 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import rootRouter from './routers/index.js';
 import cookieParser from 'cookie-parser';
+import { swaggerMid } from './middleware/swaggerMid.js';
 
 const PORT = Number(env('PORT', '3000'));
 
 export const setupServer = () => {
   const app = express();
+  app.use('/api-docs', swaggerMid());
   const logger = pino({
     transport: {
       target: 'pino-pretty',
